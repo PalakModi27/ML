@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+
+# loading the data from csv file to pandas dataframe
+house_dataset = pd.read_csv('tvmarketing.csv')
+
+# inspecting the first 5 rows of the dataframe
+#house_dataset.head()
+#house_dataset.shape
+#house_dataset.info()
+#house_dataset.isnull().sum()
+
+X = house_dataset.iloc[:,:-1].values    #all values except last column
+Y = house_dataset.iloc[:,-1].values      #only last column
+
+# loading the linear regression model
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size=0.3, random_state=2)
+
+#X_train=np.reshape(X_train,(-1,1))
+#Y_train=np.reshape(Y_train,(-1,1))
+#X_test=np.reshape(X_test,(-1,1))
+#Y_test=np.reshape(Y_test,(-1,1))
+
+lin_reg_model = LinearRegression()
+lin_reg_model.fit(X_train,Y_train)     
+Y_predict = lin_reg_model.predict(X_test)
+
+error_score = metrics.r2_score(Y_test, Y_predict)
+print("R squared Error = %2.3f: " % (error_score))     
+
+error_score = metrics.mean_absolute_error(Y_test, Y_predict)
+print("Mean Absolute Error = %2.3f: " % (error_score))     
+
+error_score = metrics.mean_squared_error(Y_test, Y_predict)
+print("Mean Squared Error = %2.3f: " % (error_score))     
+
+
+# Visualising the Training set results
+plt.scatter(X_train, Y_train, color = 'red')
+plt.plot(X_train, lin_reg_model.predict(X_train), color = 'blue')
+plt.title('TV vs Sales (Training set)')
+plt.xlabel('TV')
+plt.ylabel('Sales')
+plt.show()
+
+# Visualising the Test set results
+plt.scatter(X_test, Y_test, color = 'red')
+plt.plot(X_test, lin_reg_model.predict(X_test), color = 'blue')
+plt.title('TV vs Sales (Test set)')
+plt.xlabel('TV')
+plt.ylabel('Sales')
+plt.show()

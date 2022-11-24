@@ -1,0 +1,244 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.metrics import r2_score
+
+1)CREATE DATASET
+
+x = np.array([i * np.pi/180 for i in range(60,300,4)])
+np.random.seed(10)
+y = np.sin(x) + np.random.normal(0,0.15,len(x))
+
+df = pd.DataFrame(np.column_stack([x,y]), columns=['x','y'])
+
+for i in range(2,16):
+    colname = 'x_%d'%i
+    df[colname] = df["x"]**i
+
+print(df.head())
+
+2)TRAIN TEST SPLIT
+
+X = df.drop(["y"], axis=1)
+Y = df.iloc[:,1]
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+Y = np.asarray(Y).reshape(-1,1)
+
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=0.3, random_state=42)
+print("x_train.shape = ", x_train.shape)
+print("x_test.shape = ", x_test.shape)
+print("y_train.shape = ", y_train.shape)
+print("y_test.shape = ", y_test.shape)
+x_train.shape[1]
+
+3)OBTAIN BETA
+
+learning_rate = [0.0001, 0.001, 0.01, 0.1, 1, 10]
+lambda_val = [pow(10, -5), pow(10, -3), 0, 1, 10, 20]
+x_test = np.insert(x_test, 0, values=1, axis=1)
+
+n = len(x_train)
+max_r2_score_func = -1
+r2_score_func_list = list()
+beta_list = list()
+
+x_train = np.insert(x_train, 0, values=1, axis=1)
+
+for m in lambda_val:
+    A = x_train.T.dot(x_train)
+    I = np.identity(A.shape[0])
+    B = A + m * I
+    C = np.linalg.inv(B)
+    D = C.dot(x_train.T)
+    beta = D.dot(y_train)
+
+    y_pred = x_test.dot(beta)
+
+    error = y_test - y_pred
+    sq_err = np.power(error, 2)
+
+    sum_sq_err = np.sum(sq_err)
+    mse = sum_sq_err/len(y_pred)
+    rmse = np.sqrt(mse)
+
+    y_mean = np.mean(y_test)
+    total_variance = np.sum((y_test-y_mean)**2)
+
+    r2_score_func = (1-sum_sq_err/total_variance)
+    r2_score_func_list.append(r2_score_func)
+    beta_list.append(beta)
+
+index = r2_score_func_list.index(max(r2_score_func_list))
+beta = beta_list[index]
+max_r2_score_func = max(r2_score_func_list)
+best_lambda = lambda_val[index]
+
+print(max_r2_score_func)
+print(beta)
+print(best_lambda)
+r2_score_func_list 
+
+
+4)GRADIENT DESCENT FUNCTION
+
+num_iter = 5
+r2_score_func_list = list()
+beta_list = list()
+learning_rate_list = list()
+nn = len(x_train)
+
+for ln in learning_rate:
+    for jn in range(num_iter):
+
+        x0_grad = 0
+        x1_grad = 0
+        x2_grad = 0
+        x3_grad = 0
+        x4_grad = 0
+        x5_grad = 0
+        x6_grad = 0
+        x7_grad = 0
+        x8_grad = 0
+        x9_grad = 0
+        x10_grad = 0
+        x11_grad = 0
+        x12_grad = 0
+        x13_grad = 0
+        x14_grad = 0
+        x15_grad = 0
+
+
+
+        for km in range(len(x_train)):
+
+            a = x_train[km,0]
+            b = x_train[km,1]
+            c = x_train[km,2]
+            d = x_train[km,3]
+            e = x_train[km,4]
+            f = x_train[km,5]
+            g = x_train[km,6]
+            h = x_train[km,7]
+            i = x_train[km,8]
+            j = x_train[km,9]
+            k = x_train[km,10]
+            l = x_train[km,11]
+            m = x_train[km,12]
+            n = x_train[km,13]
+            o = x_train[km,14]
+            
+            q = y_train[km,]
+            # print(f)
+            
+            x0_grad += (beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o)  - q)
+            
+            x1_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * a)
+
+            x2_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * b)
+            
+            x3_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * c)
+            
+            x4_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * d)
+            
+            x5_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * e)
+            
+            x6_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * f)
+            
+            x7_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * g)
+            
+            x8_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * h)
+            
+            x9_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * i)
+            
+            x10_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * j)
+
+            x11_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * k)
+
+            x12_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * l)
+
+            x13_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * m)
+
+            x14_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * n)
+            
+            x15_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) +
+                        (beta[6]*f) + (beta[7]*g) + (beta[8]*h) + (beta[9]*i) + (beta[10]*j) + 
+                        (beta[11]*k) + (beta[12]*l) + (beta[13]*m) + (beta[14]*n) + (beta[15]*o) - q) * o)
+            
+
+        beta[0] = beta[0] - ln / nn * x0_grad
+        beta[1] = beta[1] - ln / nn * x1_grad
+        beta[2] = beta[2] - ln / nn * x2_grad
+        beta[3] = beta[3] - ln / nn * x3_grad
+        beta[4] = beta[4] - ln / nn * x4_grad
+        beta[5] = beta[5] - ln / nn * x5_grad
+        beta[6] = beta[6] - ln / nn * x6_grad
+        beta[7] = beta[7] - ln / nn * x7_grad
+        beta[8] = beta[8] - ln / nn * x8_grad
+        beta[9] = beta[9] - ln / nn * x9_grad
+        beta[10] = beta[10] - ln / nn * x10_grad
+        beta[11] = beta[11] - ln / nn * x11_grad
+        beta[12] = beta[12] - ln / nn * x12_grad
+        beta[13] = beta[13] - ln / nn * x13_grad
+        beta[14] = beta[14] - ln / nn * x14_grad
+        beta[15] = beta[15] - ln / nn * x15_grad
+
+        beta_list.append(beta)
+        beta = np.array(beta).reshape(-1,1)
+        y_pred = x_test.dot(beta)
+
+        error = y_test - y_pred
+        sq_err = np.power(error, 2)
+
+        sum_sq_err = np.sum(sq_err)
+        mse = sum_sq_err/len(y_pred)
+        rmse = np.sqrt(mse)
+
+        y_mean = np.mean(y_test)
+        total_variance = np.sum((y_test-y_mean)**2)
+
+        r2_score_func = (1-sum_sq_err/total_variance)
+        r2_score_func_list.append(r2_score_func)
+        learning_rate_list.append(ln)
+
+index = r2_score_func_list.index(max(r2_score_func_list))
+beta = beta_list[index]
+max_r2_score_func = max(r2_score_func_list)
+best_ln = learning_rate_list[index]
+print(max_r2_score_func)
+print(beta)
+print(best_ln)

@@ -1,0 +1,101 @@
+1)LOAD DATASET
+
+import pandas as pd
+customers=pd.read_csv("/content/AWCustomers.csv")
+display(customers.head())
+print("No.of Customers",len(customers))
+
+2)IMPORTANT COLUMNS
+
+important_cols=['AddressLine1','AddressLine2','City','StateProvinceName','CountryRegionName','PostalCode',
+                'BirthDate','Education','Occupation','Gender','MaritalStatus','HomeOwnerFlag',
+               'NumberCarsOwned','NumberChildrenAtHome','TotalChildren','YearlyIncome']
+
+df=customers[important_cols]
+
+3)PREPROCESS THE ADDRESS-DUMMY ENCODING
+
+print(
+    "No.of unique address",len(df['AddressLine1'].unique()),'\n',
+    "No of unique city",len(df['City'].unique()),'\n',
+    "No of unique postal code",len(df['PostalCode'].unique()),'\n',
+    "No,of unique states",len(df['StateProvinceName'].unique()),'\n',
+    "No of unique country",len(df['CountryRegionName'].unique())
+)
+
+def preprocess_address(df):
+    df.drop(columns=['AddressLine1','AddressLine2','City','StateProvinceName','PostalCode'],axis=1,inplace=True)
+    ohe_countries=pd.get_dummies(df['CountryRegionName'],drop_first=True)
+    df.drop(columns=['CountryRegionName'],axis=1,inplace=True)
+    df=pd.concat([ohe_countries,df],axis=1)
+    return df
+
+df=preprocess_address(df)
+df.head()
+
+
+3)PREPROCESS THE BIRTHDATE
+
+
+df['BirthDate']= pd.to_datetime(df['BirthDate'])
+
+import datetime
+CURRENT_TIME = datetime.datetime.now()
+def get_age(birth_date,today=CURRENT_TIME):
+    y=today-birth_date
+    return y.days//365
+
+df['Age']=df['BirthDate'].apply(lambda x: get_age(x))
+df.drop(['BirthDate'],axis=1,inplace=True)
+df.head()
+
+
+4)HANDLE CARDINAL COLUMNS
+
+df['Education']=df['Education'].map({'Partial High School':1,'High School':2,'Partial College':3,'Bachelors':4,'Graduate Degree':5})
+df['Occupation']=df['Occupation'].map({'Manual':1,'Skilled Manual':2,'Clerical':3,'Management':4,'Professional':5})
+def handle_cardinal_cols(df):
+    df['Male']=df['Gender'].map({'M':1,'F':0})
+    df.drop(['Gender'],axis=1,inplace=True)
+    df['MaritalStatus']=df['MaritalStatus'].map({'M':1,'S':0})
+    
+    return df
+df=handle_cardinal_cols(df)
+df.head()
+
+5)CHECK YOUR PREPROCESSING
+
+df.isnull().sum()
+
+6)NORMALIZATION-SCALING
+
+#normalization
+from sklearn.preprocessing import MinMaxScaler
+def scaleDown(df):
+    scaler=MinMaxScaler()
+    scaled=scaler.fit_transform(df[['YearlyIncome','Age']])
+    df['YearlyIncome_scaled']=scaled[:,0]
+    df['Age_scaled']=scaled[:,1]
+    df.drop(['YearlyIncome','Age'],axis=1,inplace=True)
+    return df
+df=scaleDown(df)
+
+
+7)BINARIZATION-ONE HOT ENCODING
+
+from sklearn.preprocessing import LabelEncoder
+encoder=LabelEncoder()
+df["Education"]=encoder.fit_transform(df['Education'])
+df["Occupation"]=encoder.fit_transform(df['Occupation'])
+
+8)FIND DISTANCE METRICES
+
+from scipy.spatial import distance
+distance.cosine(df['Education'].values,df['YearlyIncome_scaled'].values)
+distance.jaccard(df['Education'].values,df['YearlyIncome_scaled'].values)
+
+9) FIND CORRELATION
+
+from scipy.stats import pearsonr
+pearsonr(df['Education'].values,df['YearlyIncome_scaled'].values)[0]
+

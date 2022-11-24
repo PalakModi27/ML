@@ -1,0 +1,132 @@
+1)LOAD THE DATASET WITH THE HEADERS:
+
+header_names = ["symboling", "normalized_losses",
+"make", "fuel_type", "aspiration","num_doors", "body_style", "drive_wheels",
+"engine_location", "wheel_base", "length", "width", "height", "curb_weight",
+"engine_type", "num_cylinders", "engine_size", "fuel_system", "bore", "stroke",
+"compression_ratio", "horsepower", "peak_rpm", "city_mpg", "highway_mpg", "price"]
+
+cars_df = pd.read_csv("/content/imports-85.txt", header=None, names=header_names)
+cars_df.head()
+
+2) REPLACE ALL NAN VALUES WITH CENTRAL TENDENCIES
+
+
+cars_df.isna().sum()
+cars_df = cars_df.replace('?', -10)
+cars_df.drop(cars_df[cars_df["aspiration"]=='s'].index, inplace=True)
+cars_df.dtypes
+cars_df.normalized_losses = cars_df.normalized_losses.astype("int64")
+cars_df.bore = cars_df.bore.astype("float64")
+cars_df.stroke = cars_df.stroke.astype("float64")
+cars_df.price = cars_df.price.astype("float64")
+
+cars_df = cars_df.replace(-10, np.nan)
+cars_df.isna().sum()
+cars_df.dropna(subset=["price"], inplace=True)
+
+cars_df["normalized_losses"].fillna(cars_df["normalized_losses"].mean(), inplace=True)
+cars_df["bore"].fillna(cars_df["bore"].mean(), inplace=True)
+cars_df["stroke"].fillna(cars_df["stroke"].mean(), inplace=True)
+cars_df = cars_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+cars_df.isna().sum()
+
+3) REPLACE WORDS WITH NUMBERS
+
+print(cars_df["num_doors"].value_counts())
+print(cars_df["num_cylinders"].value_counts())
+let_num = {"two":2, "three":3, "four":4, "five":5, "six":6, "eight":8, "twelve":12}
+cars_df["num_doors"].replace(["four", "two"], [4, 2], inplace=True)
+cars_df["num_cylinders"].replace(["four", "six", "five", "two", "eight", "three", "twelve"], [4, 6, 5, 2, 8, 3, 12], inplace=True)
+
+4)DUMMY ENCODING
+
+print(cars_df["body_style"].unique())
+print(cars_df["drive_wheels"].unique())
+cars_df = pd.get_dummies(cars_df, prefix=["body", "drive"], columns=["body_style", "drive_wheels"], drop_first=True)
+cars_df.head()
+
+5)LABEL ENCODING
+
+from sklearn.preprocessing import LabelEncoder
+le = LabelEncoder()
+# “make”, “aspiration”, “engine_location”,fuel_type:
+cars_df["make"] = le.fit_transform(cars_df["make"])
+cars_df["aspiration"] = le.fit_transform(cars_df["aspiration"])
+cars_df["engine_location"] = le.fit_transform(cars_df["engine_location"])
+cars_df["fuel_type"] = le.fit_transform(cars_df["fuel_type"])
+print(cars_df.shape)
+cars_df.head()
+
+6)REPLACE EXPRESSIONS
+
+import re
+
+x = cars_df["fuel_system"].unique()
+for el in x:
+    if re.search("pfi", el)!=None:
+        cars_df["fuel_system"].replace(el, 1, inplace=True)
+    else:
+        cars_df["fuel_system"].replace(el, 0, inplace=True)
+
+y = cars_df["engine_type"].unique()
+for el in y:
+    if re.search("ohc", el)!=None:
+        cars_df["engine_type"].replace(el, 1, inplace=True)
+    else:
+        cars_df["engine_type"].replace(el, 0, inplace=True)
+
+cars_df.head()
+
+7)LINEAR REGRESSION SIMPLE
+
+X = cars_df.loc[:, cars_df.columns!="price"]
+Y = cars_df.loc[:, cars_df.columns=="price"]
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+
+x_scaled = scaler.fit_transform(X)
+x_scaled = np.insert(x_scaled, 0, values=1, axis=1)
+x_train, x_test, y_train, y_test = train_test_split(x_scaled, Y, test_size=0.3, random_state=42)
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression().fit(x_train, y_train)
+y_pred = lr.predict(x_test)
+
+error = y_test - y_pred
+sq_err = np.power(error, 2)
+
+sum_sq_err = np.sum(sq_err)
+mse = sum_sq_err/len(y_pred)
+rmse = np.sqrt(mse)
+
+y_mean = np.mean(y_test)
+total_variance = np.sum((y_test-y_mean)**2)
+
+r2_score = (1-sum_sq_err/total_variance)
+print(r2_score)
+
+8)LINEAR REGRESSION WITH PCA
+
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+
+x_scaled = pca.fit_transform(x_scaled)
+x_train, x_test, y_train, y_test = train_test_split(x_scaled, Y, test_size=0.3, random_state=42)
+
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression().fit(x_train, y_train)
+y_pred = lr.predict(x_test)
+
+error = y_test - y_pred
+sq_err = np.power(error, 2)
+
+sum_sq_err = np.sum(sq_err)
+mse = sum_sq_err/len(y_pred)
+rmse = np.sqrt(mse)
+
+y_mean = np.mean(y_test)
+total_variance = np.sum((y_test-y_mean)**2)
+
+r2_score = (1-sum_sq_err/total_variance)
+print(r2_score)
+

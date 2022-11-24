@@ -1,0 +1,186 @@
+1)
+i)REVERSE
+
+import numpy as np
+array = np.array([1, 2, 3, 6, 4, 5]) 
+print(array[::-1])
+print(np.flip(array))
+
+ii)FLATTEN
+
+array1 = np.array([[1, 2, 3], [2, 4, 5], [1, 2, 3]]) 
+print(array1.flatten())
+print(array1.ravel())
+
+iii)COMPARE
+
+arr1 = np.array([[1, 2], [3, 4]])
+arr2 = np.array([[1, 2], [3, 4]])
+comparison=arr1==arr2
+equal_arrays=comparison.all()
+print(equal_arrays)
+
+iv)FREQUENCY AND INDEX
+
+y = np.array([1, 1, 1, 2, 3, 4, 2, 4, 3, 3, ]) 
+print(np.bincount(y).argmax())
+print(np.where(y==1))
+
+v)SUM
+
+gfg = np.matrix('[4, 1, 9; 12, 3, 1; 4, 5, 6]')
+print(np.sum(gfg))
+print(np.sum(gfg,axis=1))
+print(np.sum(gfg,axis=0))
+
+vi)EIGEN
+
+n_array = np.array([[55, 25, 15],[30, 44, 2],[11, 45, 77]])
+print(np.trace(n_array))
+
+w,v=np.linalg.eig(n_array)
+print(w)
+print(v)
+print(np.linalg.inv(n_array))
+print(np.linalg.det(n_array))
+
+vii)MULTIPLY
+
+import numpy as np
+p=[[1,2],[2,3]]
+q=[[4,5],[6,7]]
+res=[[0,0],[0,0]]
+for i in range(len(p)):
+    for j in range(len(q[0])):
+        for k in range(len(q)):
+ 
+            res[i][j] += p[i][k] * q[k][j]
+print("For question Matrix 1:") 
+print (res)
+print(np.cov(p,q))
+
+viii)CARTESIAN PRODUCT
+
+import numpy as np
+x=np.array([[2,3,4],[3,2,9],])
+y=np.array([[1,5,0],[5,10,3]])
+print("Matrices :")
+print("x =", x)
+print("y =", y)
+  
+# Inner product of matrices
+print("\nInner product of matrices x and y =")
+print(np.inner(x, y))
+
+#outer
+print("\nOuter product of matrices x and y =")
+print(np.outer(x, y))
+
+#cartesian
+print("\nCartesian product of matrices x and y =")
+print(np.cross(x, y))
+
+2)
+
+i)ABSOLUTE
+
+import numpy as np
+array=np.array([[1,-2,3],[-4,5,-6]])
+print(array)
+print(np.absolute(array))
+
+ii)PERCENTILE
+
+flat=array.flatten()
+print("50th percentile of arr : ",
+       np.percentile(flat, 50))
+print("25th percentile of arr : ",
+       np.percentile(flat, 25))
+print("75th percentile of arr : ",
+       np.percentile(flat, 75))
+
+iii)MEAN MEDIAN MODE
+
+print("Mean",np.mean(flat))
+print("Median",np.median(flat))
+print("STD",np.std(flat))
+
+iv)FLOOR CEIL
+
+import numpy as np
+a=np.array([-1.8,-1.6,-0.5,0.5,1.6,1.8,3.0])
+print("Original array:")
+print(a)
+print("Floor values of the above array elements:")
+print(np.floor(a))
+print("Ceil values of the above array elements:")
+print(np.ceil(a))
+print("Truncated values of the above array elements:")
+print(np.trunc(a))
+print("Rounded values of the above array elements:")
+print(np.round(a))
+
+3)
+i)SORT
+
+import numpy as np
+array=np.array([10,52,62,16,16,54,453])
+print(array)
+print(np.sort(array))
+
+ii)INDEXES OF SORT
+
+indices = np.argsort(array)
+print(indices)
+
+iii)INETEGER AND FLOAT
+
+import numpy as np
+array = np.array([1.0, 1.2, 2.2, 2.0, 3.0, 2.0])
+def isInt(num):
+  return np.equal(np.mod(num,1),0)
+
+for num in array:
+  if isInt(num):
+    print(num, "is Integer")
+  else:
+    print(num, "is Float")
+
+4)
+IMAGE PROCESSING
+
+import keras
+from keras.preprocessing.image import load_img
+  
+# load and show an image with Pillow
+from PIL import Image
+# Open the image form working directory
+image = Image.open('Screenshot (79).png')
+# summarize some details about the image
+from matplotlib import image
+from matplotlib import pyplot
+# load image as pixel array
+image = Image.open('Screenshot (79).png')
+# summarize shape of the pixel array
+
+# display the array of pixels as an image
+pyplot.imshow(image)
+pyplot.show()
+from PIL import Image
+from numpy import asarray
+# load the image
+image = Image.open('Screenshot (79).png')
+# convert image to numpy array
+data = asarray(image)
+print(type(data))
+# summarize shape
+print(data.shape)
+
+# create Pillow image
+image2 = Image.fromarray(data)
+print(type(image2))
+
+# summarize image details
+print(image2.mode)
+print(image2.size)
+print(data)

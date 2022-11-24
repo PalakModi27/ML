@@ -1,0 +1,113 @@
+X = housing_df.iloc[:,0:5]
+Y = housing_df['Price']
+
+from sklearn.preprocessing import StandardScaler
+mm = StandardScaler()
+X_scaled = mm.fit_transform(X)
+
+# X_scaled = np.insert(X_scaled, 0, values=1, axis=1) //not needed
+
+Y = np.asarray(Y).reshape(-1,1)
+
+1)DIVIDE THE DATA INTO TRAIN,TEST,SPLIT
+
+train_ratio = 0.56
+validation_ratio = 0.14
+test_ratio = 0.30
+x_train, x_test, y_train, y_test = train_test_split(X_scaled, Y, test_size=1-train_ratio)
+x_val, x_test, y_val, y_test = train_test_split(x_test, y_test, test_size=test_ratio/(test_ratio + validation_ratio)) 
+
+print("x_train.shape = ", x_train.shape)
+print("x_val.shape = ", x_val.shape)
+print("x_test.shape = ", x_test.shape)
+
+print("y_train.shape = ", y_train.shape)
+print("y_val.shape = ", y_val.shape)
+print("y_test.shape = ", y_test.shape)
+
+2)FIND GRADIENT DESCENT VALUES OF BETA
+
+learning_rate = [0.001, 0.01, 0.1, 1]
+
+from sklearn.base import BaseEstimator
+beta = np.zeros(6)
+num_iter = 1000
+n = len(x_train)
+max_beta = None
+max_r2_score = -100000
+x_val = np.insert(x_val, 0, values=1, axis=1)
+
+for i in learning_rate:
+    for j in range(num_iter):
+
+        x0_grad = 0
+        x1_grad = 0
+        x2_grad = 0
+        x3_grad = 0
+        x4_grad = 0
+        x5_grad = 0
+
+        for k in range(len(x_train)):
+
+            a = x_train[k,0]
+            b = x_train[k,1]
+            c = x_train[k,2]
+            d = x_train[k,3]
+            e = x_train[k,4]
+            f = y_train[k,]
+            # print(f)
+            
+            x0_grad += (beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f)
+            x1_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f) * a)
+            x2_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f) * b)
+            x3_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f) * c) 
+            x4_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f) * d)
+            x5_grad += ((beta[0] + (beta[1]*a) + (beta[2]*b) + (beta[3]*c) + (beta[4]*d) + (beta[5]*e) - f) * e)
+
+        beta[0] = beta[0] - i / n * x0_grad
+        beta[1] = beta[1] - i / n * x1_grad
+        beta[2] = beta[2] - i / n * x2_grad
+        beta[3] = beta[3] - i / n * x3_grad
+        beta[4] = beta[4] - i / n * x4_grad
+        beta[5] = beta[5] - i / n * x5_grad
+        
+        beta = np.array(beta).reshape(-1,1)
+        y_pred = x_val.dot(beta)
+
+        error = y_val - y_pred
+        sq_err = np.power(error, 2)
+
+        sum_sq_err = np.sum(sq_err)
+        mse = sum_sq_err/len(y_pred)
+        rmse = np.sqrt(mse)
+
+        y_mean = np.mean(y_val)
+        total_variance = np.sum((y_val-y_mean)**2)
+
+        r2_score = (1-sum_sq_err/total_variance)
+        # print(r2_score)
+
+        if r2_score > max_r2_score:
+            best_learning_rate = i
+            max_beta = beta
+            max_r2_score = r2_score
+
+print(max_beta)
+print(best_learning_rate)
+
+3)USE THE BEST BETA MATRIX TO FIND NEW ERROR
+
+x_test = np.insert(x_test, 0, values=1, axis=1)
+y_pred = x_test.dot(max_beta)
+error = y_test - y_pred
+sq_err = np.power(error, 2)
+
+sum_sq_err = np.sum(sq_err)
+mse = sum_sq_err/len(y_pred)
+rmse = np.sqrt(mse)
+
+y_mean = np.mean(y_test)
+total_variance = np.sum((y_test-y_mean)**2)
+
+r2_score = (1-sum_sq_err/total_variance)
+print(r2_score)
